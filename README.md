@@ -59,5 +59,6 @@ End-to-end on a laptop with a 27B local model served by Ollama **running on CPU*
 - Corpus is a small random Wikipedia sample (see arabic-rag-bench), so many questions are legitimately unanswerable.
 - CORS is wide open for local development; restrict it before any public deployment.
 - No streaming yet: the app waits for the full answer.
+- Built and tested on Flutter 3.47.8 (pinned in CI). Flutter 3.50 deprecates `package:flutter/material.dart` in favour of `material_ui`; migration is pending.
 
 Wikipedia text is CC BY-SA 4.0; no article text is stored in this repository.
