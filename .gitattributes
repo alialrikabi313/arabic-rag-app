@@ -1,0 +1,4 @@
+# كود المنصّات المولَّد تلقائياً من Flutter لا يمثّل المشروع في شريط اللغات
+app/windows/** linguist-vendored
+app/android/** linguist-vendored
+app/web/** linguist-vendored
