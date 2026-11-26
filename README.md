@@ -2,6 +2,10 @@
 
 An Arabic (RTL) question-answering app over Arabic Wikipedia: a **Flutter** chat UI backed by a small **FastAPI** RAG service that retrieves with `bge-m3`, answers with a local LLM (Ollama), and **cites its sources**.
 
+[![tests](https://github.com/alialrikabi313/arabic-rag-app/actions/workflows/test.yml/badge.svg)](https://github.com/alialrikabi313/arabic-rag-app/actions/workflows/test.yml)
+
+> **TL;DR** — Ask in Arabic, get an answer with numbered, tappable Wikipedia sources — and an honest "not found" when retrieval is weak (threshold calibrated on 442 + 20 questions).
+
 ```
 Flutter app ──POST /ask──▶ FastAPI ──▶ bge-m3 retrieval (cosine, paragraph chunks)
      ▲                         │                    │
