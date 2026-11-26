@@ -11,7 +11,15 @@ Flutter app ──POST /ask──▶ FastAPI ──▶ bge-m3 retrieval (cosine,
 ## Why it is built this way
 
 - **Paragraph chunking**, not semantic: it won on Arabic Wikipedia in the companion benchmark [arabic-rag-bench](https://github.com/alialrikabi313/arabic-rag-bench) and costs no extra embedding pass at index time.
-- **Refuses instead of guessing.** If the best chunk scores below `MIN_SCORE` the backend answers "not found" without calling the LLM. The threshold is calibrated, not guessed: 80 in-domain questions (median 0.63, min 0.40) vs. 6 off-topic ones (max 0.48). `0.50` separates all the off-topic ones but also refuses ~9% of valid questions — a deliberate, documented trade-off in `backend/config.py`.
+- **Refuses instead of guessing — with a measured trade-off.** If the best chunk scores below `MIN_SCORE` the backend answers "not found" without calling the LLM. Calibrated on 442 valid questions vs. 20 off-topic ones:
+
+  | Threshold | Valid questions answered | Off-topic answered |
+  |---|---|---|
+  | 0.45 | 97% | 70% |
+  | **0.50 (current)** | 93% | 25% |
+  | 0.55 | 82% | 0% |
+
+  Similarity alone does not separate the two cleanly, so the prompt also instructs the model to admit when sources don't contain the answer (a second guard). The threshold is a policy choice documented in `backend/config.py`.
 - **Explicit UTF-8 decoding** in the app: `package:http` assumes latin1 when the response has no charset, which silently corrupts Arabic. A test pins this.
 
 ## Run
@@ -36,11 +44,11 @@ cd backend && pytest tests          # real index, stubbed LLM (no Ollama needed)
 cd app && flutter test && flutter analyze
 ```
 
-Backend tests use real cases from the benchmark (an LLM-generated question on the Wikipedia article «الرعاية الملائمة في وقت مبكر», and an off-topic question that scored 0.39).
+Backend tests use real cases from the benchmark (an LLM-generated question on the Wikipedia article «الرعاية الملائمة في وقت مبكر» and an off-topic question about cooking).
 
 ## Measured
 
-End-to-end on a laptop (RTX 5090 Laptop GPU box, 27B local model): ~90 s for the first grounded answer including model load; off-topic questions are refused in ~3 s. A smaller local model is the obvious lever for latency.
+End-to-end on a laptop with a 27B local model served by Ollama **running on CPU**: ~90 s for the first grounded answer (including model load); off-topic questions below the threshold are refused in ~3 s without touching the LLM. A smaller model or GPU offload is the obvious lever for latency.
 
 ## Limits
 
